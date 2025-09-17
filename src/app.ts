@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cardRoutes from './routes/cards';
-import analysisRoutes from './routes/analysis';
 
 dotenv.config();
 const app: Application = express();
@@ -17,7 +16,6 @@ mongoose.connect(process.env.MONGO_URI || '')
 
 // Routes
 app.use('/api/cards', cardRoutes);
-app.use('/api/analysis', analysisRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
