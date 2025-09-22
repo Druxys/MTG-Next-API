@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cardRoutes from './routes/cards';
+import authRoutes from './routes/auth';
 import {specs, swaggerUi} from './config/swagger';
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Routes
 app.use('/api/cards', cardRoutes);
+app.use('/api/auth', authRoutes);
 
 /**
  * @swagger

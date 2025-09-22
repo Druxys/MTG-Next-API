@@ -7,6 +7,7 @@ import {
   getTextAnalysis
 } from '../controllers/cardController';
 import upload from '../middleware/upload';
+import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -16,6 +17,8 @@ const router = express.Router();
  *   post:
  *     summary: Create a new card (with optional image upload)
  *     tags: [Cards]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -141,6 +144,25 @@ const router = express.Router();
  *                 summary: Duplicate Scryfall ID
  *                 value:
  *                   error: "A card with this Scryfall ID already exists"
+ *       401:
+ *         description: Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               no_token:
+ *                 summary: No token provided
+ *                 value:
+ *                   error: "Access token required. Please provide a valid authentication token."
+ *               invalid_token:
+ *                 summary: Invalid token
+ *                 value:
+ *                   error: "Invalid token. Please authenticate again."
+ *               expired_token:
+ *                 summary: Token expired
+ *                 value:
+ *                   error: "Token expired. Please authenticate again."
  *       500:
  *         description: Internal server error
  *         content:
@@ -148,7 +170,7 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/', upload.single('image'), createCard);
+router.post('/', authenticateToken, upload.single('image'), createCard);
 
 /**
  * @swagger
