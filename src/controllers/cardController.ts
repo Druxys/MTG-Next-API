@@ -7,7 +7,7 @@ import fs from 'fs';
 // Get all cards with optional filtering
 export const getAllCards = async (req: Request, res: Response) => {
     try {
-        const {name, type, rarity, page = 1, limit = 10} = req.query;
+        const {name, type, rarity, colors, page = 1, limit = 10} = req.query;
 
         // Build filter object
         const filter: any = {};
@@ -19,6 +19,13 @@ export const getAllCards = async (req: Request, res: Response) => {
         }
         if (rarity) {
             filter.rarity = rarity;
+        }
+        if (colors) {
+            // Handle both single color and multiple colors (comma-separated)
+            const colorArray = typeof colors === 'string' ? colors.split(',').map(c => c.trim().toUpperCase()) : [];
+            if (colorArray.length > 0) {
+                filter.colors = {$in: colorArray};
+            }
         }
 
         const pageNum = parseInt(page as string);
