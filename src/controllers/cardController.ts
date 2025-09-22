@@ -4,6 +4,14 @@ import {createDecryptStream, encryptFile, generateEncryptedFilename} from '../ut
 import path from 'path';
 import fs from 'fs';
 
+
+/**TODO**
+ * Implement caching for frequently accessed data
+ * Add bulk operations for card management
+ * Implement soft delete for cards
+ */
+
+
 // Define stop words to ignore in word frequency analysis
 const STOP_WORDS = new Set([
     'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
