@@ -2,10 +2,152 @@ import express from 'express';
 import {
   getAllCards,
   getCardById,
-  getCardImage
+  getCardImage,
+  createCard
 } from '../controllers/cardController';
+import upload from '../middleware/upload';
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/cards:
+ *   post:
+ *     summary: Create a new card (with optional image upload)
+ *     tags: [Cards]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - rarity
+ *               - type
+ *               - text
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The card name
+ *                 example: "Lightning Bolt"
+ *               rarity:
+ *                 type: string
+ *                 enum: [common, uncommon, rare, mythic]
+ *                 description: The card rarity
+ *                 example: "common"
+ *               type:
+ *                 type: string
+ *                 description: The card type
+ *                 example: "Instant"
+ *               text:
+ *                 type: string
+ *                 description: The card text/description
+ *                 example: "Lightning Bolt deals 3 damage to any target."
+ *               manaCost:
+ *                 type: string
+ *                 description: The mana cost of the card
+ *                 example: "{R}"
+ *               convertedManaCost:
+ *                 type: number
+ *                 minimum: 0
+ *                 description: The converted mana cost
+ *                 example: 1
+ *               colors:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum: [W, U, B, R, G]
+ *                 description: Array of color codes (W=White, U=Blue, B=Black, R=Red, G=Green)
+ *                 example: ["R"]
+ *               scryfallId:
+ *                 type: string
+ *                 description: Unique Scryfall identifier
+ *                 example: "e3285e6e-fda6-42d8-8d44-d4fcb12443c8"
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - rarity
+ *               - type
+ *               - text
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The card name
+ *                 example: "Lightning Bolt"
+ *               rarity:
+ *                 type: string
+ *                 enum: [common, uncommon, rare, mythic]
+ *                 description: The card rarity
+ *                 example: "common"
+ *               type:
+ *                 type: string
+ *                 description: The card type
+ *                 example: "Instant"
+ *               text:
+ *                 type: string
+ *                 description: The card text/description
+ *                 example: "Lightning Bolt deals 3 damage to any target."
+ *               manaCost:
+ *                 type: string
+ *                 description: The mana cost of the card
+ *                 example: "{R}"
+ *               convertedManaCost:
+ *                 type: number
+ *                 minimum: 0
+ *                 description: The converted mana cost
+ *                 example: 1
+ *               colors:
+ *                 type: string
+ *                 description: JSON string array of color codes (W=White, U=Blue, B=Black, R=Red, G=Green)
+ *                 example: '["R"]'
+ *               scryfallId:
+ *                 type: string
+ *                 description: Unique Scryfall identifier
+ *                 example: "e3285e6e-fda6-42d8-8d44-d4fcb12443c8"
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Card image file (JPEG, PNG, GIF, WebP - max 10MB)
+ *                 example: (binary data)
+ *     responses:
+ *       201:
+ *         description: Card created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Card created successfully"
+ *                 card:
+ *                   $ref: '#/components/schemas/Card'
+ *       400:
+ *         description: Validation error or duplicate data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               validation_error:
+ *                 summary: Missing required field
+ *                 value:
+ *                   error: "Name is required and must be a non-empty string"
+ *               duplicate_error:
+ *                 summary: Duplicate Scryfall ID
+ *                 value:
+ *                   error: "A card with this Scryfall ID already exists"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/', upload.single('image'), createCard);
 
 /**
  * @swagger
