@@ -1,0 +1,165 @@
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+
+const options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'MTG Card API',
+            version: '1.0.0',
+            description: 'A REST API for storing and managing Magic: The Gathering card data with encrypted image.',
+            contact: {
+                name: 'Paul Turpin',
+            },
+        },
+        servers: [
+            {
+                url: 'http://localhost:4000',
+                description: 'Development server',
+            },
+        ],
+        components: {
+            schemas: {
+                Card: {
+                    type: 'object',
+                    required: ['name', 'rarity', 'type', 'text'],
+                    properties: {
+                        _id: {
+                            type: 'string',
+                            description: 'Card ID',
+                            example: '507f1f77bcf86cd799439011',
+                        },
+                        name: {
+                            type: 'string',
+                            description: 'Card name',
+                            example: 'Lightning Bolt',
+                        },
+                        rarity: {
+                            type: 'string',
+                            enum: ['common', 'uncommon', 'rare', 'mythic'],
+                            description: 'Card rarity',
+                            example: 'common',
+                        },
+                        type: {
+                            type: 'string',
+                            description: 'Card type',
+                            example: 'Instant',
+                        },
+                        text: {
+                            type: 'string',
+                            description: 'Card text/description',
+                            example: 'Lightning Bolt deals 3 damage to any target.',
+                        },
+                        imagePath: {
+                            type: 'string',
+                            description: 'Path to encrypted card image',
+                            example: '/uploads/encrypted/card_image.enc',
+                        },
+                        scryfallId: {
+                            type: 'string',
+                            description: 'Scryfall API ID',
+                            example: 'e3285e6b-3e79-4d7c-bf96-d920f973b122',
+                        },
+                        manaCost: {
+                            type: 'string',
+                            description: 'Mana cost notation',
+                            example: '{R}',
+                        },
+                        convertedManaCost: {
+                            type: 'number',
+                            description: 'Converted mana cost',
+                            example: 1,
+                        },
+                        colors: {
+                            type: 'array',
+                            items: {
+                                type: 'string',
+                                enum: ['W', 'U', 'B', 'R', 'G'],
+                            },
+                            description: 'Card colors (WUBRG notation)',
+                            example: ['R'],
+                        },
+                        createdAt: {
+                            type: 'string',
+                            format: 'date-time',
+                            description: 'Creation timestamp',
+                        },
+                        updatedAt: {
+                            type: 'string',
+                            format: 'date-time',
+                            description: 'Last update timestamp',
+                        },
+                    },
+                },
+                CardsResponse: {
+                    type: 'object',
+                    properties: {
+                        cards: {
+                            type: 'array',
+                            items: {
+                                $ref: '#/components/schemas/Card',
+                            },
+                        },
+                        pagination: {
+                            type: 'object',
+                            properties: {
+                                currentPage: {
+                                    type: 'number',
+                                    example: 1,
+                                },
+                                totalPages: {
+                                    type: 'number',
+                                    example: 10,
+                                },
+                                totalCards: {
+                                    type: 'number',
+                                    example: 100,
+                                },
+                                hasNext: {
+                                    type: 'boolean',
+                                    example: true,
+                                },
+                                hasPrev: {
+                                    type: 'boolean',
+                                    example: false,
+                                },
+                            },
+                        },
+                    },
+                },
+                Error: {
+                    type: 'object',
+                    properties: {
+                        error: {
+                            type: 'string',
+                            description: 'Error message',
+                            example: 'Internal server error',
+                        },
+                    },
+                },
+                HealthResponse: {
+                    type: 'object',
+                    properties: {
+                        status: {
+                            type: 'string',
+                            example: 'OK',
+                        },
+                        timestamp: {
+                            type: 'string',
+                            format: 'date-time',
+                        },
+                        uptime: {
+                            type: 'number',
+                            description: 'Server uptime in seconds',
+                        },
+                    },
+                },
+            },
+        },
+    },
+    apis: ['./src/routes/*.ts', './src/controllers/*.ts'],
+};
+
+const specs = swaggerJsdoc(options);
+
+export {specs, swaggerUi};
