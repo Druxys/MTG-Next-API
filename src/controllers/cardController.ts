@@ -4,6 +4,17 @@ import {createDecryptStream, encryptFile, generateEncryptedFilename} from '../ut
 import path from 'path';
 import fs from 'fs';
 
+// Define stop words to ignore in word frequency analysis
+const STOP_WORDS = new Set([
+    'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
+    'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did',
+    'will', 'would', 'could', 'should', 'may', 'might', 'can', 'must', 'shall',
+    'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they',
+    'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'her', 'its', 'our', 'their',
+    'as', 'if', 'then', 'than', 'when', 'where', 'why', 'how', 'what', 'which', 'who', 'whom',
+    'up', 'down', 'out', 'off', 'over', 'under', 'again', 'further', 'then', 'once'
+]);
+
 // Get all cards with optional filtering
 export const getAllCards = async (req: Request, res: Response) => {
     try {
@@ -257,6 +268,94 @@ export const createCard = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'A card with this unique field already exists' });
         }
 
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Get text analysis statistics for all cards
+export const getTextAnalysis = async (req: Request, res: Response) => {
+    try {
+        // Fetch all cards with only the text field
+        const cards = await Card.find({}, 'text').lean();
+        
+        if (cards.length === 0) {
+            return res.json({
+                mostFrequentWord: null,
+                longestWord: null,
+                averageTextLength: 0
+            });
+        }
+
+        // Initialize data structures for analysis
+        const wordFrequency = new Map<string, number>();
+        const wordCardCount = new Map<string, Set<string>>();
+        let totalWords = 0;
+        let totalTexts = 0;
+
+        // Process each card's text
+        cards.forEach((card) => {
+            if (!card.text || typeof card.text !== 'string') {
+                return;
+            }
+
+            totalTexts++;
+            
+            // Clean and split text into words
+            const words = card.text
+                .toLowerCase()
+                .replace(/[^a-zA-Z\s]/g, ' ') // Replace non-letters with spaces
+                .split(/\s+/)
+                .filter(word => word.length > 0);
+
+            totalWords += words.length;
+
+            // Process each word
+            words.forEach(word => {
+                // Track word frequency (excluding stop words)
+                if (!STOP_WORDS.has(word)) {
+                    wordFrequency.set(word, (wordFrequency.get(word) || 0) + 1);
+                }
+
+                // Track which cards contain each word (for longest word analysis)
+                if (!wordCardCount.has(word)) {
+                    wordCardCount.set(word, new Set());
+                }
+                wordCardCount.get(word)!.add(card._id.toString());
+            });
+        });
+
+        // Find most frequent word (excluding stop words)
+        let mostFrequentWord = null;
+        let maxFrequency = 0;
+        for (const [word, frequency] of wordFrequency.entries()) {
+            if (frequency > maxFrequency) {
+                maxFrequency = frequency;
+                mostFrequentWord = word;
+            }
+        }
+
+        // Find longest word that appears in at least 2 different cards
+        let longestWord = null;
+        let maxLength = 0;
+        for (const [word, cardSet] of wordCardCount.entries()) {
+            if (cardSet.size >= 2 && word.length > maxLength) {
+                maxLength = word.length;
+                longestWord = word;
+            }
+        }
+
+        // Calculate average text length in words
+        const averageTextLength = totalTexts > 0 ? 
+            Math.round((totalWords / totalTexts) * 100) / 100 : 0;
+
+        res.json({
+            mostFrequentWord,
+            longestWord,
+            averageTextLength
+        });
+
+    } catch (error) {
+        console.error('Error performing text analysis:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

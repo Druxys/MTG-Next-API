@@ -3,7 +3,8 @@ import {
   getAllCards,
   getCardById,
   getCardImage,
-  createCard
+  createCard,
+  getTextAnalysis
 } from '../controllers/cardController';
 import upload from '../middleware/upload';
 
@@ -205,6 +206,56 @@ router.post('/', upload.single('image'), createCard);
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/', getAllCards);
+
+/**
+ * @swagger
+ * /api/cards/text-analysis:
+ *   get:
+ *     summary: Get text analysis statistics for all cards
+ *     tags: [Cards]
+ *     description: |
+ *       Analyzes all stored Magic cards' texts and returns:
+ *       - The most frequent word across all card texts (ignoring stop words)
+ *       - The longest word that appears in at least 2 different cards
+ *       - The average length of card texts (in words), rounded to 2 decimals
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved text analysis statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mostFrequentWord:
+ *                   type: string
+ *                   nullable: true
+ *                   description: The most frequent word across all card texts (excluding stop words)
+ *                   example: "damage"
+ *                 longestWord:
+ *                   type: string
+ *                   nullable: true
+ *                   description: The longest word that appears in at least 2 different cards
+ *                   example: "indestructible"
+ *                 averageTextLength:
+ *                   type: number
+ *                   description: The average length of card texts in words, rounded to 2 decimals
+ *                   example: 12.45
+ *                 totalCards:
+ *                   type: integer
+ *                   description: Total number of cards analyzed
+ *                   example: 150
+ *                 totalWords:
+ *                   type: integer
+ *                   description: Total number of words across all card texts
+ *                   example: 1867
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get('/text-analysis', getTextAnalysis);
 
 /**
  * @swagger
