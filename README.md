@@ -31,7 +31,7 @@ A REST API for storing and managing Magic: The Gathering card data with encrypte
 
 1. Clone the repository:
 ```bash
-git clone <[https://github.com/Druxys/MTG-Next-API]>
+git clone https://github.com/Druxys/MTG-Next-API
 cd mtg-api
 ```
 
@@ -65,7 +65,7 @@ The API will be available at `http://localhost:4000`
 ## API Documentation
 
 Complete interactive API documentation is available via Swagger UI at:
-`http://localhost:4000/api-docs`
+`http://localhost:4000/api/docs`
 
 ## Available Scripts
 
@@ -80,3 +80,4 @@ Time Spent: Approximately 4-5 hours on implementation and documentation
 
 
 **Author**: Paul Turpin
+
